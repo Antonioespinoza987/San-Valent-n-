@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quieres ser mi cita de San Valentín?</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff4e8a, #ff9ecf);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 500px;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .frase {
+            font-size: 1.3em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        #contador {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+        }
+
+        .si {
+            background-color: #ffffff;
+            color: #ff4e8a;
+        }
+
+        .si:hover {
+            background-color: #ffe6f0;
+        }
+
+        .no {
+            background-color: #ff1e56;
+            color: white;
+        }
+
+        .no:hover {
+            position: absolute;
+            top: calc(10% + (80% * Math.random()));
+            left: calc(10% + (80% * Math.random()));
+        }
+
+        .mensaje {
+            margin-top: 20px;
+            font-size: 1.4em;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>¿Quieres ser mi cita de San Valentín? ❤️</h1>
+
+        <div class="frase">✨ Cuando empezó mi amor por ti ✨</div>
+
+        <div id="contador"></div>
+
+        <button class="si" onclick="mostrarMensaje()">Sí 💖</button>
+        <button class="no" onmouseover="moverBoton(this)">No 😜</button>
+
+        <div class="mensaje" id="mensajeFinal">
+            ¡Sabía que dirías que sí! 💘<br>
+            Gracias por hacer mi vida tan especial.
+        </div>
+    </div>
+
+    <script>
+        const fechaInicio = new Date("2024-01-04T00:00:00");
+
+        function actualizarContador() {
+            const ahora = new Date();
+            const diferencia = ahora - fechaInicio;
+
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
+            const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
+            const segundos = Math.floor((diferencia / 1000) % 60);
+
+            document.getElementById("contador").innerHTML =
+                `${dias} días, ${horas} horas, ${minutos} minutos y ${segundos} segundos desde el 4 de enero de 2024 ❤️`;
+        }
+
+        setInterval(actualizarContador, 1000);
+        actualizarContador();
+
+        function mostrarMensaje() {
+            document.getElementById("mensajeFinal").style.display = "block";
+        }
+
+        function moverBoton(boton) {
+            const x = Math.random() * (window.innerWidth - boton.clientWidth);
+            const y = Math.random() * (window.innerHeight - boton.clientHeight);
+            boton.style.position = "absolute";
+            boton.style.left = x + "px";
+            boton.style.top = y + "px";
+        }
+    </script>
+
+</body>
+</html>
