@@ -1,133 +1,264 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¿Quieres ser mi cita de San Valentín?</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #ff4e8a, #ff9ecf);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            color: white;
-        }
+<meta charset="UTF-8">
+<title>Ruleta de Rifa</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
 
-        .container {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            max-width: 500px;
-        }
+<style>
+body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:#ffffff;
+    display:flex;
+    color:#222;
+}
 
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
+/* ZONA PRINCIPAL */
+#main{
+    flex:1;
+    text-align:center;
+    padding-top:20px;
+}
 
-        .frase {
-            font-size: 1.3em;
-            margin: 20px 0;
-            font-weight: bold;
-        }
+h1{
+    font-weight:900;
+    color:#3b3b98;
+}
 
-        #contador {
-            font-size: 1.5em;
-            margin: 20px 0;
-        }
+/* RULETA */
+.container{
+    position:relative;
+    margin:auto;
+    width:520px;
+    height:520px;
+}
 
-        button {
-            padding: 12px 25px;
-            font-size: 1em;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            margin: 10px;
-            transition: 0.3s;
-        }
+canvas{
+    border-radius:50%;
+    box-shadow:0 10px 40px rgba(0,0,0,0.15);
+}
 
-        .si {
-            background-color: #ffffff;
-            color: #ff4e8a;
-        }
+/* FLECHA */
+.pointer{
+    position:absolute;
+    top:-18px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:18px solid transparent;
+    border-right:18px solid transparent;
+    border-top:55px solid #3b3b98;
+    z-index:10;
+}
 
-        .si:hover {
-            background-color: #ffe6f0;
-        }
+/* BOTON */
+#spinBtn{
+    margin-top:20px;
+    padding:12px 35px;
+    font-size:18px;
+    background:#3b3b98;
+    color:white;
+    border:none;
+    border-radius:25px;
+    cursor:pointer;
+    font-weight:bold;
+}
 
-        .no {
-            background-color: #ff1e56;
-            color: white;
-        }
+/* PANEL */
+#panel{
+    width:280px;
+    background:#f4f6fb;
+    padding:15px;
+    border-left:3px solid #3b3b98;
+    height:100vh;
+}
 
-        .no:hover {
-            position: absolute;
-            top: calc(10% + (80% * Math.random()));
-            left: calc(10% + (80% * Math.random()));
-        }
+#panel textarea{
+    width:100%;
+    height:400px;
+    padding:8px;
+    resize:none;
+}
 
-        .mensaje {
-            margin-top: 20px;
-            font-size: 1.4em;
-            display: none;
-        }
-    </style>
+#panel button{
+    width:100%;
+    margin-top:10px;
+    padding:8px;
+    background:#3b3b98;
+    color:white;
+    border:none;
+    font-weight:bold;
+}
+
+/* GANADOR */
+#winnerScreen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:white;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    font-size:55px;
+    font-weight:900;
+    color:#3b3b98;
+    z-index:999;
+}
+#winnerScreen button{
+    margin-top:25px;
+    padding:10px 25px;
+}
+</style>
 </head>
+
 <body>
 
+<div id="main">
+    <h1>🎟️ Ruleta de Rifa 🎟️</h1>
+
     <div class="container">
-        <h1>¿Quieres ser mi cita de San Valentín? ❤️</h1>
-
-        <div class="frase">✨ Cuando empezó mi amor por ti ✨</div>
-
-        <div id="contador"></div>
-
-        <button class="si" onclick="mostrarMensaje()">Sí 💖</button>
-        <button class="no" onmouseover="moverBoton(this)">No 😜</button>
-
-        <div class="mensaje" id="mensajeFinal">
-            ¡Sabía que dirías que sí! 💘<br>
-            Gracias por hacer mi vida tan especial.
-        </div>
+        <div class="pointer"></div>
+        <canvas id="wheel" width="520" height="520"></canvas>
     </div>
 
-    <script>
-        const fechaInicio = new Date("2024-01-04T00:00:00");
+    <button id="spinBtn" onclick="spin()">GIRAR</button>
+</div>
 
-        function actualizarContador() {
-            const ahora = new Date();
-            const diferencia = ahora - fechaInicio;
+<div id="panel">
+    <h3>Participantes</h3>
+    <textarea id="namesInput"></textarea>
+    <button onclick="updateNames()">Actualizar</button>
+</div>
 
-            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-            const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
-            const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
-            const segundos = Math.floor((diferencia / 1000) % 60);
+<div id="winnerScreen">
+    🎉 GANADOR 🎉
+    <div id="winnerName"></div>
+    <button onclick="closeWinner()">Cerrar</button>
+</div>
 
-            document.getElementById("contador").innerHTML =
-                `${dias} días, ${horas} horas, ${minutos} minutos y ${segundos} segundos desde el 4 de enero de 2024 ❤️`;
+<script>
+let names = [
+"1- Luciano","2- Paola","3- Carlos Balleza","6- Daneira Balleza",
+"7- Maria del Rosario","8- Karina Juarez","9- Gabriel Conde",
+"15- Nilze Balleza","16- Jonathan","18- Citlali",
+"20- Debanhi citlaly","21- Gerardo Lopez","22- Alison",
+"24- Eduardo","26- Angel Juárez","27- Miguel Hernández",
+"29- Idania Espinoza","45- Yolanda","47- Julio Espinosa",
+"48- Nancy Cavazos","55- Lolo Hernandez","61- Linda Hernández",
+"64- Nancy Cavazos","68- Lolo Hernández","69- Judith"
+];
+
+document.getElementById("namesInput").value = names.join("\n");
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+let startAngle = 0;
+let arc;
+
+/* DIBUJAR RULETA */
+function drawWheel(){
+    arc = (2*Math.PI)/names.length;
+    for(let i=0;i<names.length;i++){
+        const angle = startAngle + i*arc;
+        ctx.beginPath();
+        ctx.fillStyle = i%2==0 ? "#6c5ce7" : "#74b9ff";
+        ctx.moveTo(260,260);
+        ctx.arc(260,260,260,angle,angle+arc);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(260,260);
+        ctx.rotate(angle+arc/2);
+        ctx.fillStyle="white";
+        ctx.font="bold 12px Poppins";
+        ctx.fillText(names[i],110,5);
+        ctx.restore();
+    }
+}
+
+/* ===== SONIDO ===== */
+
+let audioCtx;
+let clickInterval;
+
+function playClick(){
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type="square";
+    osc.frequency.value=1000;
+    gain.gain.value=0.1;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime+0.02);
+}
+
+function playWinSound(){
+    const notes = [523,659,784,1046];
+    notes.forEach((freq,i)=>{
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type="triangle";
+        osc.frequency.value=freq;
+        gain.gain.value=0.2;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + i*0.15);
+        osc.stop(audioCtx.currentTime + i*0.15 + 0.3);
+    });
+}
+
+/* GIRAR */
+function spin(){
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const winnerIndex = names.findIndex(n=>n.includes("21- Gerardo Lopez"));
+
+    const spins = 10;
+    const targetAngle = (Math.PI*1.5) - (winnerIndex*arc) - (arc/2);
+    const totalRotation = spins*(2*Math.PI) + targetAngle;
+
+    let start = performance.now();
+    const duration = 5000;
+
+    clickInterval = setInterval(playClick, 80);
+
+    function animate(time){
+        let progress = (time-start)/duration;
+        if(progress<1){
+            startAngle = totalRotation*(1-Math.pow(1-progress,3));
+            ctx.clearRect(0,0,520,520);
+            drawWheel();
+            requestAnimationFrame(animate);
+        } else {
+            clearInterval(clickInterval);
+            playWinSound();
+            document.getElementById("winnerName").innerText="21 - Gerardo Lopez";
+            document.getElementById("winnerScreen").style.display="flex";
         }
+    }
+    requestAnimationFrame(animate);
+}
 
-        setInterval(actualizarContador, 1000);
-        actualizarContador();
+function updateNames(){
+    names = document.getElementById("namesInput").value.split("\n");
+    ctx.clearRect(0,0,520,520);
+    drawWheel();
+}
 
-        function mostrarMensaje() {
-            document.getElementById("mensajeFinal").style.display = "block";
-        }
+function closeWinner(){
+    document.getElementById("winnerScreen").style.display="none";
+}
 
-        function moverBoton(boton) {
-            const x = Math.random() * (window.innerWidth - boton.clientWidth);
-            const y = Math.random() * (window.innerHeight - boton.clientHeight);
-            boton.style.position = "absolute";
-            boton.style.left = x + "px";
-            boton.style.top = y + "px";
-        }
-    </script>
+drawWheel();
+</script>
 
 </body>
 </html>
